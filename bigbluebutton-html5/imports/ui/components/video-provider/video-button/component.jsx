@@ -57,10 +57,12 @@ const JoinVideoButton = ({
   };
 
   const sharingVideoLabel = isSharingVideo
-    ? intl.formatMessage(intlMessages.leaveVideo) : intl.formatMessage(intlMessages.joinVideo);
+    ? intl.formatMessage(intlMessages.leaveVideo)
+    : intl.formatMessage(intlMessages.joinVideo);
 
   const disabledLabel = isDisabled
-    ? intl.formatMessage(intlMessages.videoLocked) : sharingVideoLabel;
+    ? intl.formatMessage(intlMessages.videoLocked)
+    : sharingVideoLabel;
 
   return (
     <Button
@@ -69,7 +71,7 @@ const JoinVideoButton = ({
       onClick={isSharingVideo ? handleCloseVideo : verifyIOS}
       hideLabel
       aria-label={intl.formatMessage(intlMessages.videoButtonDesc)}
-      color={isSharingVideo ? 'primary' : 'default'}
+      color={isSharingVideo ? 'primary' : 'primary'}
       icon={isSharingVideo ? 'video' : 'video_off'}
       ghost={!isSharingVideo}
       size="lg"

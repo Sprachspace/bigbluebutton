@@ -41,7 +41,8 @@ const intlMessages = defineMessages({
   },
   emptyAudioBrdige: {
     id: 'app.navBar.emptyAudioBrdige',
-    description: 'message for notification when recording starts with no users in audio bridge',
+    description:
+      'message for notification when recording starts with no users in audio bridge',
   },
 });
 
@@ -66,7 +67,7 @@ class RecordingIndicator extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      time: (props.time ? props.time : 0),
+      time: props.time ? props.time : 0,
     };
 
     this.incrementTime = this.incrementTime.bind(this);
@@ -112,8 +113,11 @@ class RecordingIndicator extends PureComponent {
       this.interval = setInterval(this.incrementTime, 1000);
     }
 
-    const title = intl.formatMessage(recording ? intlMessages.recordingIndicatorOn
-      : intlMessages.recordingIndicatorOff);
+    const title = intl.formatMessage(
+      recording
+        ? intlMessages.recordingIndicatorOn
+        : intlMessages.recordingIndicatorOff,
+    );
 
     let recordTitle = '';
     if (!recording) {
@@ -126,7 +130,11 @@ class RecordingIndicator extends PureComponent {
 
     const recordingToggle = () => {
       if (!micUser) {
-        notify(intl.formatMessage(intlMessages.emptyAudioBrdige), 'error', 'warning');
+        notify(
+          intl.formatMessage(intlMessages.emptyAudioBrdige),
+          'error',
+          'warning',
+        );
       }
       mountModal(<RecordingContainer amIModerator={amIModerator} />);
       document.activeElement.blur();
@@ -134,18 +142,17 @@ class RecordingIndicator extends PureComponent {
 
     const recordingIndicatorIcon = (
       <span className={styles.recordingIndicatorIcon}>
-        <svg xmlns="http://www.w3.org/2000/svg" height="100%" version="1" viewBox="0 0 20 20">
-          <g stroke="#FFF" fill="#FFF" strokeLinecap="square">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="100%"
+          version="1"
+          viewBox="0 0 20 20"
+        >
+          <g stroke="#000" fill="#000" strokeLinecap="square">
+            <circle fill="none" strokeWidth="1" r="9" cx="10" cy="10" />
             <circle
-              fill="none"
-              strokeWidth="1"
-              r="9"
-              cx="10"
-              cy="10"
-            />
-            <circle
-              stroke={recording ? '#F00' : '#FFF'}
-              fill={recording ? '#F00' : '#FFF'}
+              stroke={recording ? '#F00' : '#000'}
+              fill={recording ? '#F00' : '#000'}
               r="4"
               cx="10"
               cy="10"
@@ -160,7 +167,9 @@ class RecordingIndicator extends PureComponent {
     const recordMeetingButton = (
       <div
         aria-label={title}
-        className={recording ? styles.recordingControlON : styles.recordingControlOFF}
+        className={
+          recording ? styles.recordingControlON : styles.recordingControlOFF
+        }
         role="button"
         tabIndex={0}
         key="recording-toggle"
@@ -170,15 +179,18 @@ class RecordingIndicator extends PureComponent {
         {recordingIndicatorIcon}
 
         <div className={styles.presentationTitle}>
-          {recording
-            ? (
-              <span className={styles.visuallyHidden}>
-                {`${intl.formatMessage(intlMessages.recordingAriaLabel)} ${humanizeSeconds(time)}`}
-              </span>
-            ) : null
-          }
-          {recording
-            ? <span aria-hidden>{humanizeSeconds(time)}</span> : <span>{recordTitle}</span>}
+          {recording ? (
+            <span className={styles.visuallyHidden}>
+              {`${intl.formatMessage(
+                intlMessages.recordingAriaLabel,
+              )} ${humanizeSeconds(time)}`}
+            </span>
+          ) : null}
+          {recording ? (
+            <span aria-hidden>{humanizeSeconds(time)}</span>
+          ) : (
+            <span>{recordTitle}</span>
+          )}
         </div>
       </div>
     );
@@ -189,34 +201,43 @@ class RecordingIndicator extends PureComponent {
       </Tooltip>
     );
 
-    const recordingButton = recording ? recordMeetingButtonWithTooltip : recordMeetingButton;
+    const recordingButton = recording
+      ? recordMeetingButtonWithTooltip
+      : recordMeetingButton;
 
     return (
       <Fragment>
-        {record
-          ? <span className={styles.presentationTitleSeparator} aria-hidden>|</span>
-          : null}
+        {record ? (
+          <span className={styles.presentationTitleSeparator} aria-hidden>
+            |
+          </span>
+        ) : null}
         <div className={styles.recordingIndicator}>
-          {showButton
-            ? recordingButton
-            : null}
+          {showButton ? recordingButton : null}
 
           {showButton ? null : (
             <Tooltip
-              title={`${intl.formatMessage(recording
-                ? intlMessages.notificationRecordingStart
-                : intlMessages.notificationRecordingStop)}`}
+              title={`${intl.formatMessage(
+                recording
+                  ? intlMessages.notificationRecordingStart
+                  : intlMessages.notificationRecordingStop,
+              )}`}
             >
               <div
-                aria-label={`${intl.formatMessage(recording
-                  ? intlMessages.notificationRecordingStart
-                  : intlMessages.notificationRecordingStop)}`}
+                aria-label={`${intl.formatMessage(
+                  recording
+                    ? intlMessages.notificationRecordingStart
+                    : intlMessages.notificationRecordingStop,
+                )}`}
                 className={styles.recordingStatusViewOnly}
               >
                 {recordingIndicatorIcon}
 
-                {recording
-                  ? <div className={styles.presentationTitle}>{humanizeSeconds(time)}</div> : null}
+                {recording ? (
+                  <div className={styles.presentationTitle}>
+                    {humanizeSeconds(time)}
+                  </div>
+                ) : null}
               </div>
             </Tooltip>
           )}

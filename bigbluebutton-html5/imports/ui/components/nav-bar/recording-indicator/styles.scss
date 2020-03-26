@@ -1,13 +1,17 @@
 @import "../../../stylesheets/variables/_all";
-@import '/imports/ui/stylesheets/mixins/_indicators';
+@import "/imports/ui/stylesheets/mixins/_indicators";
 @import "../../../stylesheets/variables/typography";
+@import "/imports/ui/stylesheets/variables/palette";
 
 .visuallyHidden {
   position: absolute;
   overflow: hidden;
   clip: rect(0 0 0 0);
-  height: 1px; width: 1px;
-  margin: -1px; padding: 0; border: 0;
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
 }
 
 %recordingControl {
@@ -35,26 +39,41 @@
 .recordingControlON {
   @extend %recordingControl;
 
-  padding: 5px;
+  padding: 2px;
   background-color: var(--color-primary);
+  color: var(--color-white);
   border: var(--border-size-large) solid var(--color-primary);
+
+  span {
+    color: var(--color-white) !important;
+  }
 
   &:focus {
     background-clip: padding-box;
     border: var(--border-size-large) solid transparent;
+    // color: var(--color-white);
+    span {
+      color: var(--color-white) !important;
+    }
   }
 }
 
 .recordingControlOFF {
   @extend %recordingControl;
 
-  padding: 7px;
-  border: var(--border-size-small) solid var(--color-white);
-  
+  padding: 3px;
+  border: var(--border-size-small) solid var(--color-primary);
+  span {
+    color: var(--color-primary) !important;
+  }
+
   &:focus {
-    padding: 5px;
-    border: var(--border-size-large) solid var(--color-white);
-    box-shadow: none;
+    padding: 2px;
+    border: var(--border-size-large) solid var(--color-black);
+    // box-shadow: none;
+    span {
+      color: var(--color-primary) !important;
+    }
   }
 }
 
@@ -63,7 +82,7 @@
   flex-direction: column;
   justify-content: center;
   font-weight: 200;
-  color: var(--color-white);
+  color: var(--color-black);
   font-size: var(--font-size-base);
   padding: 0;
   margin-left: var(--sm-padding-x);
@@ -73,7 +92,7 @@
   text-overflow: ellipsis;
   max-width: 30vw;
 
-  [dir="rtl"]  & {
+  [dir="rtl"] & {
     margin-left: 0;
     margin-right: var(--sm-padding-x);
   }
@@ -93,8 +112,9 @@
 
 .recordingIndicatorIcon {
   width: var(--font-size-large);
-  height: var(--font-size-large);
-  font-size: var(--font-size-base);
+  // height: var(--font-size-large);
+  height: 20px;
+  font-size: var(--font-size-small);
 }
 
 .recordingIndicator {
@@ -111,7 +131,7 @@
 }
 
 .presentationTitleSeparator {
-  color: var(--color-gray);
+  color: var(--color-primary);
   font-size: var(--font-size-base);
   margin: 0 1rem;
 }

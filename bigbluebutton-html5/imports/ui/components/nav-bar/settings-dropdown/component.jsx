@@ -130,11 +130,17 @@ class SettingsDropdown extends PureComponent {
   }
 
   componentDidMount() {
-    document.documentElement.addEventListener('fullscreenchange', this.onFullscreenChange);
+    document.documentElement.addEventListener(
+      'fullscreenchange',
+      this.onFullscreenChange,
+    );
   }
 
   componentWillUnmount() {
-    document.documentElement.removeEventListener('fullscreenchange', this.onFullscreenChange);
+    document.documentElement.removeEventListener(
+      'fullscreenchange',
+      this.onFullscreenChange,
+    );
   }
 
   onActionsShow() {
@@ -151,18 +157,16 @@ class SettingsDropdown extends PureComponent {
 
   onFullscreenChange() {
     const { isFullscreen } = this.state;
-    const newIsFullscreen = FullscreenService.isFullScreen(document.documentElement);
+    const newIsFullscreen = FullscreenService.isFullScreen(
+      document.documentElement,
+    );
     if (isFullscreen !== newIsFullscreen) {
       this.setState({ isFullscreen: newIsFullscreen });
     }
   }
 
   getFullscreenItem() {
-    const {
-      intl,
-      noIOSFullscreen,
-      handleToggleFullscreen,
-    } = this.props;
+    const { intl, noIOSFullscreen, handleToggleFullscreen } = this.props;
     const { isFullscreen } = this.state;
 
     if (noIOSFullscreen || !ALLOW_FULLSCREEN) return null;
@@ -200,7 +204,11 @@ class SettingsDropdown extends PureComponent {
 
   renderMenuItems() {
     const {
-      intl, mountModal, amIModerator, isBreakoutRoom, isMeteorConnected,
+      intl,
+      mountModal,
+      amIModerator,
+      isBreakoutRoom,
+      isMeteorConnected,
     } = this.props;
 
     const allowedToEndMeeting = amIModerator && !isBreakoutRoom;
@@ -221,64 +229,59 @@ class SettingsDropdown extends PureComponent {
       />
     );
 
-    const shouldRenderLogoutOption = (isMeteorConnected && allowLogoutSetting)
-      ? logoutOption
-      : null;
+    const shouldRenderLogoutOption = isMeteorConnected && allowLogoutSetting ? logoutOption : null;
 
     return _.compact([
       this.getFullscreenItem(),
-      (<DropdownListItem
+      <DropdownListItem
         key="list-item-settings"
         icon="settings"
         label={intl.formatMessage(intlMessages.settingsLabel)}
         description={intl.formatMessage(intlMessages.settingsDesc)}
         onClick={() => mountModal(<SettingsMenuContainer />)}
-      />),
-      (<DropdownListItem
+      />,
+      <DropdownListItem
         key="list-item-about"
         icon="about"
         label={intl.formatMessage(intlMessages.aboutLabel)}
         description={intl.formatMessage(intlMessages.aboutDesc)}
         onClick={() => mountModal(<AboutContainer />)}
-      />),
-      !helpButton ? null
-        : (
-          <DropdownListItem
-            key="list-item-help"
-            icon="help"
-            iconRight="popout_window"
-            label={intl.formatMessage(intlMessages.helpLabel)}
-            description={intl.formatMessage(intlMessages.helpDesc)}
-            onClick={() => window.open(`${helpLink}`)}
-          />
-        ),
-      (<DropdownListItem
+      />,
+      !helpButton ? null : (
+        <DropdownListItem
+          key="list-item-help"
+          icon="help"
+          iconRight="popout_window"
+          label={intl.formatMessage(intlMessages.helpLabel)}
+          description={intl.formatMessage(intlMessages.helpDesc)}
+          onClick={() => window.open(`${helpLink}`)}
+        />
+      ),
+      <DropdownListItem
         key="list-item-shortcuts"
         icon="shortcuts"
         label={intl.formatMessage(intlMessages.hotkeysLabel)}
         description={intl.formatMessage(intlMessages.hotkeysDesc)}
         onClick={() => mountModal(<ShortcutHelpComponent />)}
-      />),
-      (isMeteorConnected ? <DropdownListSeparator key={_.uniqueId('list-separator-')} /> : null),
-      allowedToEndMeeting && isMeteorConnected
-        ? (<DropdownListItem
+      />,
+      isMeteorConnected ? (
+        <DropdownListSeparator key={_.uniqueId('list-separator-')} />
+      ) : null,
+      allowedToEndMeeting && isMeteorConnected ? (
+        <DropdownListItem
           key="list-item-end-meeting"
           icon="application"
           label={intl.formatMessage(intlMessages.endMeetingLabel)}
           description={intl.formatMessage(intlMessages.endMeetingDesc)}
           onClick={() => mountModal(<EndMeetingConfirmationContainer />)}
         />
-        )
-        : null,
+      ) : null,
       shouldRenderLogoutOption,
     ]);
   }
 
   render() {
-    const {
-      intl,
-      shortcuts: OPEN_OPTIONS_AK,
-    } = this.props;
+    const { intl, shortcuts: OPEN_OPTIONS_AK } = this.props;
 
     const { isSettingOpen } = this.state;
 
@@ -293,20 +296,18 @@ class SettingsDropdown extends PureComponent {
           <Button
             label={intl.formatMessage(intlMessages.optionsLabel)}
             icon="more"
+            color="primary"
             ghost
             circle
             hideLabel
             className={styles.btn}
-
             // FIXME: Without onClick react proptypes keep warning
             // even after the DropdownTrigger inject an onClick handler
             onClick={() => null}
           />
         </DropdownTrigger>
         <DropdownContent placement="bottom right">
-          <DropdownList>
-            {this.renderMenuItems()}
-          </DropdownList>
+          <DropdownList>{this.renderMenuItems()}</DropdownList>
         </DropdownContent>
       </Dropdown>
     );
@@ -314,4 +315,7 @@ class SettingsDropdown extends PureComponent {
 }
 SettingsDropdown.propTypes = propTypes;
 SettingsDropdown.defaultProps = defaultProps;
-export default withShortcutHelper(withModalMounter(injectIntl(SettingsDropdown)), 'openOptions');
+export default withShortcutHelper(
+  withModalMounter(injectIntl(SettingsDropdown)),
+  'openOptions',
+);

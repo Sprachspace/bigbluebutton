@@ -29,7 +29,6 @@ const defaultProps = {
   webcamPlacement: 'top',
 };
 
-
 export default class Media extends Component {
   constructor(props) {
     super(props);
@@ -41,17 +40,11 @@ export default class Media extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const {
-      userWasInWebcam,
-      audioModalIsOpen,
-      joinVideo,
-    } = this.props;
+    const { userWasInWebcam, audioModalIsOpen, joinVideo } = this.props;
 
-    const {
-      audioModalIsOpen: oldAudioModalIsOpen,
-    } = prevProps;
+    const { audioModalIsOpen: oldAudioModalIsOpen } = prevProps;
 
-    if ((!audioModalIsOpen && oldAudioModalIsOpen) && userWasInWebcam) {
+    if (!audioModalIsOpen && oldAudioModalIsOpen && userWasInWebcam) {
       Session.set('userWasInWebcam', false);
       joinVideo();
     }
@@ -76,7 +69,7 @@ export default class Media extends Component {
     const overlayClassName = cx({
       [styles.overlay]: true,
       [styles.hideOverlay]: hideOverlay,
-      [styles.floatingOverlay]: (webcamPlacement === 'floating'),
+      [styles.floatingOverlay]: webcamPlacement === 'floating',
     });
 
     return (
@@ -88,13 +81,16 @@ export default class Media extends Component {
         <div
           className={!swapLayout ? contentClassName : overlayClassName}
           style={{
-            maxHeight: usersVideo.length < 1 || (webcamPlacement === 'floating') ? '100%' : '80%',
+            maxHeight:
+              usersVideo.length < 1 || webcamPlacement === 'floating'
+                ? '100%'
+                : '100%',
             minHeight: '20%',
           }}
         >
           {children}
         </div>
-        <WebcamDraggable
+        {/* <WebcamDraggable
           refMediaContainer={this.refContainer}
           swapLayout={swapLayout}
           singleWebcam={singleWebcam}
@@ -103,7 +99,7 @@ export default class Media extends Component {
           disableVideo={disableVideo}
           audioModalIsOpen={audioModalIsOpen}
           usersVideo={usersVideo}
-        />
+        /> */}
       </div>
     );
   }

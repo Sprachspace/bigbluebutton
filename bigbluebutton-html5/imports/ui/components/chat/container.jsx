@@ -5,6 +5,8 @@ import { Session } from 'meteor/session';
 import Auth from '/imports/ui/services/auth';
 import Chat from './component';
 import ChatService from './service';
+import Service from '../user-list/service';
+import Users from '/imports/api/users';
 
 const CHAT_CONFIG = Meteor.settings.public.chat;
 const PUBLIC_CHAT_KEY = CHAT_CONFIG.public_id;
@@ -27,7 +29,8 @@ const intlMessages = defineMessages({
   },
   partnerDisconnected: {
     id: 'app.chat.partnerDisconnected',
-    description: 'System chat message when the private chat partnet disconnect from the meeting',
+    description:
+      'System chat message when the private chat partnet disconnect from the meeting',
   },
 });
 
@@ -38,140 +41,163 @@ class ChatContainer extends PureComponent {
   }
 
   render() {
-    const {
-      children,
-      unmounting,
-    } = this.props;
+    const { children, unmounting } = this.props;
 
     if (unmounting === true) {
       return null;
     }
 
-    return (
-      <Chat {...this.props}>
-        {children}
-      </Chat>
-    );
+    return <Chat {...this.props}>{children}</Chat>;
   }
 }
 
-export default injectIntl(withTracker(({ intl }) => {
-  const chatID = Session.get('idChatOpen');
-  let messages = [];
-  let isChatLocked = ChatService.isChatLocked(chatID);
-  let title = intl.formatMessage(intlMessages.titlePublic);
-  let chatName = title;
-  let partnerIsLoggedOut = false;
-  let systemMessageIntl = {};
+export default injectIntl(
+  withTracker(({ intl }) => {
+    const chatID = Session.get('idChatOpen');
+    let messages = [];
+    let isChatLocked = ChatService.isChatLocked(chatID);
+    let title = intl.formatMessage(intlMessages.titlePublic);
+    let chatName = title;
+    let partnerIsLoggedOut = false;
+    let systemMessageIntl = {};
 
-  const currentUser = ChatService.getUser(Auth.userID);
-  const amIModerator = currentUser.role === ROLE_MODERATOR;
+    const currentUser = ChatService.getUser(Auth.userID);
+    const amIModerator = currentUser.role === ROLE_MODERATOR;
 
-  if (chatID === PUBLIC_CHAT_KEY) {
-    const { welcomeProp } = ChatService.getWelcomeProp();
+    if (chatID === PUBLIC_CHAT_KEY) {
+      const { welcomeProp } = ChatService.getWelcomeProp();
 
-    messages = ChatService.getPublicGroupMessages();
+      messages = ChatService.getPublicGroupMessages();
 
-    const time = currentUser.loginTime;
-    const welcomeId = `welcome-msg-${time}`;
+      const time = currentUser.loginTime;
+      const welcomeId = `welcome-msg-${time}`;
 
-    const welcomeMsg = {
-      id: welcomeId,
-      content: [{
+      const welcomeMsg = {
         id: welcomeId,
-        text: welcomeProp.welcomeMsg,
-        time,
-      }],
-      time,
-      sender: null,
-    };
-
-    const moderatorTime = time + 1;
-    const moderatorId = `moderator-msg-${moderatorTime}`;
-
-    const moderatorMsg = {
-      id: moderatorId,
-      content: [{
-        id: moderatorId,
-        text: welcomeProp.modOnlyMessage,
-        time: moderatorTime,
-      }],
-      time: moderatorTime,
-      sender: null,
-    };
-
-    const messagesBeforeWelcomeMsg = ChatService.reduceAndMapGroupMessages(
-      messages.filter(message => message.timestamp < time),
-    );
-    const messagesAfterWelcomeMsg = ChatService.reduceAndMapGroupMessages(
-      messages.filter(message => message.timestamp >= time),
-    );
-
-    const messagesFormated = messagesBeforeWelcomeMsg
-      .concat(welcomeMsg)
-      .concat(amIModerator ? moderatorMsg : [])
-      .concat(messagesAfterWelcomeMsg);
-
-    messages = messagesFormated.sort((a, b) => (a.time - b.time));
-  } else if (chatID) {
-    messages = ChatService.getPrivateGroupMessages();
-
-    const receiverUser = ChatService.getUser(chatID);
-    chatName = receiverUser.name;
-    systemMessageIntl = { 0: receiverUser.name };
-    title = intl.formatMessage(intlMessages.titlePrivate, systemMessageIntl);
-    partnerIsLoggedOut = receiverUser.connectionStatus !== CONNECTION_STATUS;
-
-    if (partnerIsLoggedOut) {
-      const time = Date.now();
-      const id = `partner-disconnected-${time}`;
-      const messagePartnerLoggedOut = {
-        id,
-        content: [{
-          id,
-          text: 'partnerDisconnected',
-          time,
-        }],
+        content: [
+          {
+            id: welcomeId,
+            text: welcomeProp.welcomeMsg,
+            time,
+          },
+        ],
         time,
         sender: null,
       };
 
-      messages.push(messagePartnerLoggedOut);
-      isChatLocked = true;
+      const moderatorTime = time + 1;
+      const moderatorId = `moderator-msg-${moderatorTime}`;
+
+      const moderatorMsg = {
+        id: moderatorId,
+        content: [
+          {
+            id: moderatorId,
+            text: welcomeProp.modOnlyMessage,
+            time: moderatorTime,
+          },
+        ],
+        time: moderatorTime,
+        sender: null,
+      };
+
+      const messagesBeforeWelcomeMsg = ChatService.reduceAndMapGroupMessages(
+        messages.filter(message => message.timestamp < time),
+      );
+      const messagesAfterWelcomeMsg = ChatService.reduceAndMapGroupMessages(
+        messages.filter(message => message.timestamp >= time),
+      );
+
+      const messagesFormated = messagesBeforeWelcomeMsg
+        .concat(welcomeMsg)
+        .concat(amIModerator ? moderatorMsg : [])
+        .concat(messagesAfterWelcomeMsg);
+
+      messages = messagesFormated.sort((a, b) => a.time - b.time);
+    } else if (chatID) {
+      messages = ChatService.getPrivateGroupMessages();
+
+      const receiverUser = ChatService.getUser(chatID);
+      chatName = receiverUser.name;
+      systemMessageIntl = { 0: receiverUser.name };
+      title = intl.formatMessage(intlMessages.titlePrivate, systemMessageIntl);
+      partnerIsLoggedOut = receiverUser.connectionStatus !== CONNECTION_STATUS;
+
+      if (partnerIsLoggedOut) {
+        const time = Date.now();
+        const id = `partner-disconnected-${time}`;
+        const messagePartnerLoggedOut = {
+          id,
+          content: [
+            {
+              id,
+              text: 'partnerDisconnected',
+              time,
+            },
+          ],
+          time,
+          sender: null,
+        };
+
+        messages.push(messagePartnerLoggedOut);
+        isChatLocked = true;
+      }
+    } else {
+      // No chatID is set so the panel is closed, about to close, or wasn't opened correctly
+      return {
+        unmounting: true,
+      };
     }
-  } else {
-    // No chatID is set so the panel is closed, about to close, or wasn't opened correctly
+
+    messages = messages.map((message) => {
+      if (message.sender) return message;
+
+      return {
+        ...message,
+        content: message.content.map(content => ({
+          ...content,
+          text:
+            content.text in intlMessages
+              ? `<b><i>${intl.formatMessage(
+                intlMessages[content.text],
+                systemMessageIntl,
+              )}</i></b>`
+              : content.text,
+        })),
+      };
+    });
+
+    const { connected: isMeteorConnected } = Meteor.status();
+
     return {
-      unmounting: true,
+      chatID,
+      chatName,
+      title,
+      messages,
+      partnerIsLoggedOut,
+      isChatLocked,
+      isMeteorConnected,
+      amIModerator,
+      actions: {
+        handleClosePrivateChat: ChatService.closePrivateChat,
+      },
+      hasBreakoutRoom: Service.hasBreakoutRoom(),
+      activeChats: Service.getActiveChats(chatID),
+      isPublicChat: Service.isPublicChat,
+      setEmojiStatus: Service.setEmojiStatus,
+      roving: Service.roving,
+      requestUserInformation: Service.requestUserInformation,
+      currentUser: Users.findOne(
+        { userId: Auth.userID },
+        {
+          fields: {
+            userId: 1,
+            role: 1,
+            locked: 1,
+            presenter: 1,
+          },
+        },
+      ),
     };
-  }
-
-  messages = messages.map((message) => {
-    if (message.sender) return message;
-
-    return {
-      ...message,
-      content: message.content.map(content => ({
-        ...content,
-        text: content.text in intlMessages
-          ? `<b><i>${intl.formatMessage(intlMessages[content.text], systemMessageIntl)}</i></b>` : content.text,
-      })),
-    };
-  });
-
-  const { connected: isMeteorConnected } = Meteor.status();
-
-  return {
-    chatID,
-    chatName,
-    title,
-    messages,
-    partnerIsLoggedOut,
-    isChatLocked,
-    isMeteorConnected,
-    amIModerator,
-    actions: {
-      handleClosePrivateChat: ChatService.closePrivateChat,
-    },
-  };
-})(ChatContainer));
+  })(ChatContainer),
+);

@@ -53,8 +53,8 @@ class UserContent extends PureComponent {
         className={styles.content}
         role="complementary"
       >
-        {CHAT_ENABLED
-          ? (<UserMessages
+        {CHAT_ENABLED ? (
+          <UserMessages
             {...{
               isPublicChat,
               activeChats,
@@ -63,32 +63,27 @@ class UserContent extends PureComponent {
               roving,
             }}
           />
-          ) : null
-        }
-        {currentUser.role === ROLE_MODERATOR
-          ? (
-            <UserCaptionsContainer
-              {...{
-                intl,
-              }}
-            />
-          ) : null
-        }
+        ) : null}
+        {currentUser.role === ROLE_MODERATOR ? (
+          <UserCaptionsContainer
+            {...{
+              intl,
+            }}
+          />
+        ) : null}
         <UserNotesContainer
           {...{
             intl,
           }}
         />
-        {pendingUsers.length > 0 && currentUser.role === ROLE_MODERATOR
-          ? (
-            <WaitingUsers
-              {...{
-                intl,
-                pendingUsers,
-              }}
-            />
-          ) : null
-        }
+        {pendingUsers.length > 0 && currentUser.role === ROLE_MODERATOR ? (
+          <WaitingUsers
+            {...{
+              intl,
+              pendingUsers,
+            }}
+          />
+        ) : null}
         <UserPolls
           isPresenter={currentUser.presenter}
           {...{
@@ -96,17 +91,20 @@ class UserContent extends PureComponent {
             forcePollOpen,
           }}
         />
-        <BreakoutRoomItem isPresenter={currentUser.presenter} hasBreakoutRoom={hasBreakoutRoom} />
-        <UserParticipantsContainer
+        <BreakoutRoomItem
+          isPresenter={currentUser.presenter}
+          hasBreakoutRoom={hasBreakoutRoom}
+        />
+        {/* <UserParticipantsContainer
           {...{
             compact,
             intl,
             currentUser,
             setEmojiStatus,
             roving,
-            requestUserInformation,
+            requestUserInformation
           }}
-        />
+        /> */}
       </div>
     );
   }

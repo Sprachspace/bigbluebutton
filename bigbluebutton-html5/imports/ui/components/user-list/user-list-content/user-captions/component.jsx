@@ -45,9 +45,7 @@ class UserCaptions extends Component {
   }
 
   renderCaptions() {
-    const {
-      ownedLocales,
-    } = this.props;
+    const { ownedLocales } = this.props;
 
     return ownedLocales.map(locale => (
       <CSSTransition
@@ -69,6 +67,10 @@ class UserCaptions extends Component {
     const {
       intl,
       ownedLocales,
+      currentUser,
+      users,
+      setEmojiStatus,
+      meetingIsBreakout,
     } = this.props;
 
     if (ownedLocales.length < 1) return null;
@@ -84,14 +86,29 @@ class UserCaptions extends Component {
           role="tabpanel"
           tabIndex={0}
           className={styles.scrollableList}
-          ref={(ref) => { this._msgsList = ref; }}
+          ref={(ref) => {
+            this._msgsList = ref;
+          }}
         >
           <div className={styles.list}>
-            <TransitionGroup ref={(ref) => { this._msgItems = ref; }}>
+            <TransitionGroup
+              ref={(ref) => {
+                this._msgItems = ref;
+              }}
+            >
               {this.renderCaptions()}
             </TransitionGroup>
           </div>
         </div>
+        {currentUser.role === ROLE_MODERATOR ? (
+          <UserOptionsContainer
+            {...{
+              users,
+              setEmojiStatus,
+              meetingIsBreakout,
+            }}
+          />
+        ) : null}
       </div>
     );
   }

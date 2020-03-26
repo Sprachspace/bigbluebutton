@@ -83,6 +83,11 @@
   span {
     box-shadow: none;
     background-color: transparent !important;
-    border-color: var(--color-white) !important;
+    border-color: var(--color-primary) !important;
   }
+}
+
+.actionsDropdownContainer {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }

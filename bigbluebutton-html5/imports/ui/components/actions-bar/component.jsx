@@ -47,69 +47,61 @@ class ActionsBar extends PureComponent {
     return (
       <div className={styles.actionsbar}>
         <div className={styles.left}>
-          <ActionsDropdown {...{
-            amIPresenter,
-            amIModerator,
-            isPollingEnabled,
-            allowExternalVideo,
-            handleTakePresenter,
-            intl,
-            isSharingVideo,
-            stopExternalVideoShare,
-            isMeteorConnected,
-          }}
+          <ActionsDropdown
+            {...{
+              amIPresenter,
+              amIModerator,
+              isPollingEnabled,
+              allowExternalVideo,
+              handleTakePresenter,
+              intl,
+              isSharingVideo,
+              stopExternalVideoShare,
+              isMeteorConnected,
+            }}
           />
-          {isPollingEnabled
-            ? (
-              <QuickPollDropdown
-                {...{
-                  currentSlidHasContent,
-                  intl,
-                  amIPresenter,
-                  parseCurrentSlideContent,
-                }}
-              />
-            ) : null
-          }
-          {isCaptionsAvailable
-            ? (
-              <CaptionsButtonContainer {...{ intl }} />
-            )
-            : null
-          }
+          {isPollingEnabled ? (
+            <QuickPollDropdown
+              {...{
+                currentSlidHasContent,
+                intl,
+                amIPresenter,
+                parseCurrentSlideContent,
+              }}
+            />
+          ) : null}
+          {isCaptionsAvailable ? (
+            <CaptionsButtonContainer {...{ intl }} />
+          ) : null}
         </div>
         <div className={cx(actionBarClasses)}>
           <AudioControlsContainer />
-          {enableVideo
-            ? (
-              <JoinVideoOptionsContainer
-                handleJoinVideo={handleJoinVideo}
-                handleCloseVideo={handleExitVideo}
-              />
-            )
-            : null}
-          <DesktopShare {...{
-            handleShareScreen,
-            handleUnshareScreen,
-            isVideoBroadcasting,
-            amIPresenter,
-            screenSharingCheck,
-            screenShareEndAlert,
-            isMeteorConnected,
-            screenshareDataSavingSetting,
-          }}
+          {enableVideo ? (
+            <JoinVideoOptionsContainer
+              handleJoinVideo={handleJoinVideo}
+              handleCloseVideo={handleExitVideo}
+            />
+          ) : null}
+          <DesktopShare
+            {...{
+              handleShareScreen,
+              handleUnshareScreen,
+              isVideoBroadcasting,
+              amIPresenter,
+              screenSharingCheck,
+              screenShareEndAlert,
+              isMeteorConnected,
+              screenshareDataSavingSetting,
+            }}
           />
         </div>
         <div className={styles.right}>
-          {isLayoutSwapped
-            ? (
-              <PresentationOptionsContainer
-                toggleSwapLayout={toggleSwapLayout}
-                isThereCurrentPresentation={isThereCurrentPresentation}
-              />
-            )
-            : null
-          }
+          {isLayoutSwapped ? (
+            <PresentationOptionsContainer
+              toggleSwapLayout={toggleSwapLayout}
+              isThereCurrentPresentation={isThereCurrentPresentation}
+            />
+          ) : null}
         </div>
       </div>
     );

@@ -9,10 +9,11 @@
   --cam-dropdown-width: 70%;
   --audio-indicator-width: 1.12rem;
   --audio-indicator-fs: 75%;
-  position: absolute;
+  // position: absolute;
   width: 100%;
   min-height: var(--video-height);
-  height: 100%;
+  height: 50vh;
+  flex-grow: 1;
   top: 0;
   left: 0;
   right: 0;
@@ -26,7 +27,7 @@
   display: grid;
   border-radius: 5px;
 
-  grid-auto-flow: dense;
+  grid-auto-flow: row;
   grid-gap: 5px;
 
   align-items: center;
@@ -52,6 +53,7 @@
 .content {
   position: relative;
   display: flex;
+  flex-direction: column;
   min-width: 100%;
   border-radius: 5px;
 
@@ -68,7 +70,7 @@
     pointer-events: none;
 
     :global(.animationsEnabled) & {
-      transition: opacity .1s;
+      transition: opacity 0.1s;
     }
   }
 
@@ -85,11 +87,11 @@
   border-radius: 5px;
 }
 
-.cursorGrab{
+.cursorGrab {
   cursor: grab;
 }
 
-.cursorGrabbing{
+.cursorGrabbing {
   cursor: grabbing;
 }
 
@@ -103,7 +105,7 @@
   }
 }
 
-.videoContainer{
+.videoContainer {
   width: 100%;
   height: 100%;
 }
@@ -117,23 +119,22 @@
   white-space: nowrap;
   z-index: 1;
 
-
   &::after {
-    content: '';
+    content: "";
     display: inline-block;
     height: 100%;
     vertical-align: middle;
     margin: 0 -0.25em 0 0;
 
     [dir="rtl"] & {
-      margin: 0 0 0 -0.25em
+      margin: 0 0 0 -0.25em;
     }
   }
 
   &::before {
     content: "\e949";
     /* ascii code for the ellipsis character */
-    font-family: 'bbb-icons' !important;
+    font-family: "bbb-icons" !important;
     display: inline-block;
 
     :global(.animationsEnabled) & {
@@ -167,8 +168,8 @@
   width: var(--cam-dropdown-width);
 
   @include mq($medium-up) {
-    >[aria-expanded] {
-      padding: .25rem;
+    > [aria-expanded] {
+      padding: 0.25rem;
     }
   }
 }
@@ -182,15 +183,15 @@
   @extend %text-elipsis;
   position: relative;
   background-color: var(--color-black);
-  opacity: .5;
+  opacity: 0.5;
   color: var(--color-white);
   font-size: 80%;
   border-radius: 15px;
-  padding: 0 1rem 0 .5rem !important;
+  padding: 0 1rem 0 0.5rem !important;
 }
 
 .noMenu {
-  padding: 0 .5rem 0 .5rem !important;
+  padding: 0 0.5rem 0 0.5rem !important;
 }
 
 .dropdownTrigger {
@@ -203,7 +204,7 @@
     top: 45%;
     width: 0;
     line-height: 0;
-    right: .45rem;
+    right: 0.45rem;
   }
 }
 
@@ -217,7 +218,7 @@
 
 .dropdownList {
   @include mq($medium-up) {
-    font-size: .86rem;
+    font-size: 0.86rem;
   }
 }
 

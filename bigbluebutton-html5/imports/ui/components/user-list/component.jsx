@@ -5,6 +5,10 @@ import injectWbResizeEvent from '/imports/ui/components/presentation/resize-wrap
 import { styles } from './styles.scss';
 import CustomLogo from './custom-logo/component';
 import UserContentContainer from './user-list-content/container';
+import JoinVideoOptionsContainer from '../video-provider/video-button/container';
+import AudioControlsContainer from '../audio/audio-controls/container';
+import PresentationOptionsContainer from '../actions-bar/presentation-options/component';
+import VideoProviderContainer from '/imports/ui/components/video-provider/container';
 
 const propTypes = {
   activeChats: PropTypes.arrayOf(String).isRequired,
@@ -22,6 +26,9 @@ const propTypes = {
 
 const defaultProps = {
   compact: false,
+  swapLayout: false,
+  disableVideo: false,
+  audioModalIsOpen: false,
 };
 
 class UserList extends PureComponent {
@@ -32,7 +39,16 @@ class UserList extends PureComponent {
       compact,
       setEmojiStatus,
       isPublicChat,
+      isLayoutSwapped,
+      enableVideo,
+      handleExitVideo,
+      handleJoinVideo,
+      isThereCurrentPresentation,
+      toggleSwapLayout,
       roving,
+      swapLayout,
+      disableVideo,
+      audioModalIsOpen,
       CustomLogoUrl,
       showBranding,
       hasBreakoutRoom,
@@ -41,25 +57,41 @@ class UserList extends PureComponent {
 
     return (
       <div className={styles.userList}>
+        {showBranding && !compact && CustomLogoUrl ? (
+          <CustomLogo CustomLogoUrl={CustomLogoUrl} />
+        ) : null}
         {
-          showBranding
-            && !compact
-            && CustomLogoUrl
-            ? <CustomLogo CustomLogoUrl={CustomLogoUrl} /> : null
+          <UserContentContainer
+            {...{
+              intl,
+              activeChats,
+              compact,
+              setEmojiStatus,
+              isPublicChat,
+              roving,
+              hasBreakoutRoom,
+              requestUserInformation,
+            }}
+          />
         }
-        {<UserContentContainer
-          {...{
-            intl,
-            activeChats,
-            compact,
-            setEmojiStatus,
-            isPublicChat,
-            roving,
-            hasBreakoutRoom,
-            requestUserInformation,
-          }
-          }
-        />}
+        {!disableVideo && !audioModalIsOpen ? (
+          <VideoProviderContainer swapLayout={swapLayout} />
+        ) : null}
+        <div className={styles.audVid}>
+          {isLayoutSwapped ? (
+            <PresentationOptionsContainer
+              toggleSwapLayout={toggleSwapLayout}
+              isThereCurrentPresentation={isThereCurrentPresentation}
+            />
+          ) : null}
+          <AudioControlsContainer />
+          {enableVideo ? (
+            <JoinVideoOptionsContainer
+              handleJoinVideo={handleJoinVideo}
+              handleCloseVideo={handleExitVideo}
+            />
+          ) : null}
+        </div>
       </div>
     );
   }

@@ -107,7 +107,12 @@ class App extends Component {
 
   componentDidMount() {
     const {
-      locale, notify, intl, validIOSVersion, startBandwidthMonitoring, handleNetworkConnection,
+      locale,
+      notify,
+      intl,
+      validIOSVersion,
+      startBandwidthMonitoring,
+      handleNetworkConnection,
     } = this.props;
     const BROWSER_RESULTS = browser();
     const isMobileBrowser = BROWSER_RESULTS.mobile || BROWSER_RESULTS.os.includes('Android');
@@ -115,20 +120,25 @@ class App extends Component {
     MediaService.setSwapLayout();
     Modal.setAppElement('#app');
     document.getElementsByTagName('html')[0].lang = locale;
-    document.getElementsByTagName('html')[0].style.fontSize = isMobileBrowser ? MOBILE_FONT_SIZE : DESKTOP_FONT_SIZE;
+    document.getElementsByTagName('html')[0].style.fontSize = isMobileBrowser
+      ? MOBILE_FONT_SIZE
+      : DESKTOP_FONT_SIZE;
 
     const body = document.getElementsByTagName('body')[0];
     if (BROWSER_RESULTS && BROWSER_RESULTS.name) {
       body.classList.add(`browser-${BROWSER_RESULTS.name}`);
     }
     if (BROWSER_RESULTS && BROWSER_RESULTS.os) {
-      body.classList.add(`os-${BROWSER_RESULTS.os.split(' ').shift().toLowerCase()}`);
+      body.classList.add(
+        `os-${BROWSER_RESULTS.os
+          .split(' ')
+          .shift()
+          .toLowerCase()}`,
+      );
     }
 
     if (!validIOSVersion()) {
-      notify(
-        intl.formatMessage(intlMessages.iOSWarning), 'error', 'warning',
-      );
+      notify(intl.formatMessage(intlMessages.iOSWarning), 'error', 'warning');
     }
 
     this.handleWindowResize();
@@ -137,47 +147,56 @@ class App extends Component {
     if (ENABLE_NETWORK_MONITORING) {
       if (navigator.connection) {
         handleNetworkConnection();
-        navigator.connection.addEventListener('change', handleNetworkConnection);
+        navigator.connection.addEventListener(
+          'change',
+          handleNetworkConnection,
+        );
       }
 
       startBandwidthMonitoring();
     }
 
-    logger.info({ logCode: 'app_component_componentdidmount' }, 'Client loaded successfully');
+    logger.info(
+      { logCode: 'app_component_componentdidmount' },
+      'Client loaded successfully',
+    );
   }
 
   componentDidUpdate(prevProps) {
     const {
-      meetingMuted, notify, currentUserEmoji, intl, hasPublishedPoll,
+      meetingMuted,
+      notify,
+      currentUserEmoji,
+      intl,
+      hasPublishedPoll,
     } = this.props;
 
     if (prevProps.currentUserEmoji.status !== currentUserEmoji.status) {
-      const formattedEmojiStatus = intl.formatMessage({ id: `app.actionsBar.emojiMenu.${currentUserEmoji.status}Label` })
-      || currentUserEmoji.status;
+      const formattedEmojiStatus = intl.formatMessage({
+        id: `app.actionsBar.emojiMenu.${currentUserEmoji.status}Label`,
+      }) || currentUserEmoji.status;
 
       notify(
         currentUserEmoji.status === 'none'
           ? intl.formatMessage(intlMessages.clearedEmoji)
-          : intl.formatMessage(intlMessages.setEmoji, ({ 0: formattedEmojiStatus })),
+          : intl.formatMessage(intlMessages.setEmoji, {
+            0: formattedEmojiStatus,
+          }),
         'info',
-        currentUserEmoji.status === 'none'
-          ? 'clear_status'
-          : 'user',
+        currentUserEmoji.status === 'none' ? 'clear_status' : 'user',
       );
     }
     if (!prevProps.meetingMuted && meetingMuted) {
-      notify(
-        intl.formatMessage(intlMessages.meetingMuteOn), 'info', 'mute',
-      );
+      notify(intl.formatMessage(intlMessages.meetingMuteOn), 'info', 'mute');
     }
     if (prevProps.meetingMuted && !meetingMuted) {
-      notify(
-        intl.formatMessage(intlMessages.meetingMuteOff), 'info', 'unmute',
-      );
+      notify(intl.formatMessage(intlMessages.meetingMuteOff), 'info', 'unmute');
     }
     if (!prevProps.hasPublishedPoll && hasPublishedPoll) {
       notify(
-        intl.formatMessage(intlMessages.pollPublishedLabel), 'info', 'polling',
+        intl.formatMessage(intlMessages.pollPublishedLabel),
+        'info',
+        'polling',
       );
     }
   }
@@ -186,7 +205,11 @@ class App extends Component {
     const { handleNetworkConnection } = this.props;
     window.removeEventListener('resize', this.handleWindowResize, false);
     if (navigator.connection) {
-      navigator.connection.addEventListener('change', handleNetworkConnection, false);
+      navigator.connection.addEventListener(
+        'change',
+        handleNetworkConnection,
+        false,
+      );
     }
   }
 
@@ -224,11 +247,7 @@ class App extends Component {
 
     if (!navbar) return null;
 
-    return (
-      <header className={styles.navbar}>
-        {navbar}
-      </header>
-    );
+    return <header className={styles.navbar}>{navbar}</header>;
   }
 
   renderSidebar() {
@@ -236,11 +255,7 @@ class App extends Component {
 
     if (!sidebar) return null;
 
-    return (
-      <aside className={styles.sidebar}>
-        {sidebar}
-      </aside>
-    );
+    return <aside className={styles.sidebar}>{sidebar}</aside>;
   }
 
   renderCaptions() {
@@ -248,18 +263,11 @@ class App extends Component {
 
     if (!captions) return null;
 
-    return (
-      <div className={styles.captionsWrapper}>
-        {captions}
-      </div>
-    );
+    return <div className={styles.captionsWrapper}>{captions}</div>;
   }
 
   renderMedia() {
-    const {
-      media,
-      intl,
-    } = this.props;
+    const { media, intl } = this.props;
 
     if (!media) return null;
 
@@ -276,10 +284,7 @@ class App extends Component {
   }
 
   renderActionsBar() {
-    const {
-      actionsbar,
-      intl,
-    } = this.props;
+    const { actionsbar, intl } = this.props;
 
     if (!actionsbar) return null;
 
@@ -299,28 +304,28 @@ class App extends Component {
 
     const { inactivityCheck, responseDelay } = User;
 
-    return (inactivityCheck ? (
+    return inactivityCheck ? (
       <ActivityCheckContainer
         inactivityCheck={inactivityCheck}
         responseDelay={responseDelay}
-      />) : null);
+      />
+    ) : null;
   }
 
   renderUserInformation() {
     const { UserInfo, User } = this.props;
 
-    return (UserInfo.length > 0 ? (
+    return UserInfo.length > 0 ? (
       <UserInfoContainer
         UserInfo={UserInfo}
         requesterUserId={User.userId}
         meetingId={User.meetingId}
-      />) : null);
+      />
+    ) : null;
   }
 
   render() {
-    const {
-      customStyle, customStyleUrl, openPanel,
-    } = this.props;
+    const { customStyle, customStyleUrl, openPanel } = this.props;
     return (
       <main className={styles.main}>
         {this.renderActivityCheck()}
@@ -331,7 +336,7 @@ class App extends Component {
           <div className={openPanel ? styles.content : styles.noPanelContent}>
             {this.renderNavBar()}
             {this.renderMedia()}
-            {this.renderActionsBar()}
+            {/* {this.renderActionsBar()} */}
           </div>
           {this.renderPanel()}
           {this.renderSidebar()}
@@ -346,8 +351,18 @@ class App extends Component {
         <LockNotifier />
         <PingPongContainer />
         <ManyWebcamsNotifier />
-        {customStyleUrl ? <link rel="stylesheet" type="text/css" href={customStyleUrl} /> : null}
-        {customStyle ? <link rel="stylesheet" type="text/css" href={`data:text/css;charset=UTF-8,${encodeURIComponent(customStyle)}`} /> : null}
+        {customStyleUrl ? (
+          <link rel="stylesheet" type="text/css" href={customStyleUrl} />
+        ) : null}
+        {customStyle ? (
+          <link
+            rel="stylesheet"
+            type="text/css"
+            href={`data:text/css;charset=UTF-8,${encodeURIComponent(
+              customStyle,
+            )}`}
+          />
+        ) : null}
       </main>
     );
   }

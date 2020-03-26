@@ -13,19 +13,23 @@ import NavBar from './component';
 const PUBLIC_CONFIG = Meteor.settings.public;
 const ROLE_MODERATOR = PUBLIC_CONFIG.user.role_moderator;
 const NavBarContainer = ({ children, ...props }) => (
-  <NavBar {...props}>
-    {children}
-  </NavBar>
+  <NavBar {...props}>{children}</NavBar>
 );
 
 export default withTracker(() => {
-  const CLIENT_TITLE = getFromUserSettings('bbb_client_title', PUBLIC_CONFIG.app.clientTitle);
+  const CLIENT_TITLE = getFromUserSettings(
+    'bbb_client_title',
+    PUBLIC_CONFIG.app.clientTitle,
+  );
 
   let meetingTitle;
   const meetingId = Auth.meetingID;
-  const meetingObject = Meetings.findOne({
-    meetingId,
-  }, { fields: { 'meetingProp.name': 1, 'breakoutProps.sequence': 1 } });
+  const meetingObject = Meetings.findOne(
+    {
+      meetingId,
+    },
+    { fields: { 'meetingProp.name': 1, 'breakoutProps.sequence': 1 } },
+  );
 
   if (meetingObject != null) {
     meetingTitle = meetingObject.meetingProp.name;
@@ -48,7 +52,10 @@ export default withTracker(() => {
   };
 
   const { connectRecordingObserver, processOutsideToggleRecording } = Service;
-  const currentUser = Users.findOne({ userId: Auth.userID }, { fields: { role: 1 } });
+  const currentUser = Users.findOne(
+    { userId: Auth.userID },
+    { fields: { role: 1 } },
+  );
   const openPanel = Session.get('openPanel');
   const isExpanded = openPanel !== '';
   const amIModerator = currentUser.role === ROLE_MODERATOR;

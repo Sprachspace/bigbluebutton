@@ -1,8 +1,8 @@
 @import "../../../stylesheets/variables/_all";
 
 :root {
-  --toolbar-margin: .8rem;
-  --toolbar-box-shadow: 0 0 10px -2px rgba(0, 0, 0, .25);
+  --toolbar-margin: 0.8rem;
+  --toolbar-box-shadow: 0 0 10px -2px rgba(0, 0, 0, 0.25);
   --toolbar-button-color: var(--btn-default-color);
   --toolbar-button-bg: var(--btn-default-bg);
   --toolbar-button-width: 3rem;
@@ -14,7 +14,7 @@
   --toolbar-list-bg: #ddd;
   --toolbar-list-bg-focus: #c6c6c6;
   --toolbar-list-color: var(--color-gray);
-  --toolbar-item-outline-offset: -.19rem;
+  --toolbar-item-outline-offset: -0.19rem;
   --toolbar-item-triangle-padding: 2px;
 }
 
@@ -36,13 +36,15 @@
     left: 0;
   }
 
-  @include mq("#{$landscape} and (max-height:#{upper-bound($small-range)}), #{$small-only}") {
-    transform: scale(.75);
+  @include mq(
+    "#{$landscape} and (max-height:#{upper-bound($small-range)}), #{$small-only}"
+  ) {
+    transform: scale(0.75);
     transform-origin: right;
   }
 }
 
-.toolbarContainer:hover{
+.toolbarContainer:hover {
   z-index: 3;
 }
 
@@ -58,7 +60,8 @@
 
   .buttonWrapper > .toolbarButton {
     outline-offset: var(--toolbar-item-outline-offset);
-    border-bottom: var(--toolbar-button-border) solid var(--toolbar-button-border-color);
+    border-bottom: var(--toolbar-button-border) solid
+      var(--toolbar-button-border-color);
   }
 
   .buttonWrapper:first-child > .toolbarButton {
@@ -102,7 +105,7 @@
 }
 
 .cornerTriangle::before {
-  content: '';
+  content: "";
   position: absolute;
   border-color: transparent;
   border-style: solid;
@@ -240,8 +243,9 @@
 .textThickness {
   font-family: Arial, sans-serif;
   font-weight: normal;
-  text-shadow: -1px 0 var(--toolbar-list-bg-focus), 0 1px var(--toolbar-list-bg-focus), 1px 0 var(--toolbar-list-bg-focus), 0 -1px var(--toolbar-list-bg-focus);
+  text-shadow: -1px 0 var(--toolbar-list-bg-focus),
+    0 1px var(--toolbar-list-bg-focus), 1px 0 var(--toolbar-list-bg-focus),
+    0 -1px var(--toolbar-list-bg-focus);
   margin: auto;
   color: var(--toolbar-list-color);
 }
-

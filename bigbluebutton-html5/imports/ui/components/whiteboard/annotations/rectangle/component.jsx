@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import AnnotationHelpers from '../helpers';
 
 export default class RectangleDrawComponent extends Component {
-
   shouldComponentUpdate(nextProps) {
     return this.props.version !== nextProps.version;
   }
@@ -46,6 +45,20 @@ export default class RectangleDrawComponent extends Component {
   render() {
     const results = this.getCoordinates();
     const { annotation, slideWidth } = this.props;
+    // console.log(AnnotationHelpers.getFormattedColor(annotation.color));
+    let fillCollorRect = AnnotationHelpers.getFormattedColor(annotation.color);
+    if (fillCollorRect == '#66ff66') {
+      fillCollorRect = 'rgba(102, 255, 102, 0.25)';
+    }
+    if (fillCollorRect == '#00ff00') {
+      fillCollorRect = 'rgba(0, 255, 0, 0.25)';
+    }
+    if (fillCollorRect == '#8800ff') {
+      fillCollorRect = 'none';
+    }
+    if (fillCollorRect == '#b866ff') {
+      fillCollorRect = 'none';
+    }
 
     return (
       <rect
@@ -53,9 +66,12 @@ export default class RectangleDrawComponent extends Component {
         y={results.y}
         width={results.width}
         height={results.height}
-        fill="none"
         stroke={AnnotationHelpers.getFormattedColor(annotation.color)}
-        strokeWidth={AnnotationHelpers.getStrokeWidth(annotation.thickness, slideWidth)}
+        fill={fillCollorRect}
+        strokeWidth={AnnotationHelpers.getStrokeWidth(
+          annotation.thickness,
+          slideWidth,
+        )}
         style={{ WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)' }}
       />
     );

@@ -1,20 +1,31 @@
 @import "../../stylesheets/variables/_all";
+@import "/imports/ui/stylesheets/variables/palette";
 
 :root {
-  --mobile-nav-height: 5rem;
-  --mobile-margin-top: .25rem;
+  --mobile-nav-height: 3rem;
+  --mobile-margin-top: 0.25rem;
 }
 
 .navbar {
   display: flex;
   flex-direction: column;
-  height:var(--mobile-nav-height);
+  height: var(--mobile-nav-height);
 }
 
 .top,
 .bottom {
   display: flex;
   flex-direction: row;
+}
+
+.top {
+  height: 40px;
+  overflow: none;
+}
+
+.logolink {
+  height: 40px;
+  overflow: none;
 }
 
 .bottom {
@@ -61,7 +72,7 @@
   position: relative;
 
   &:after {
-    content: '';
+    content: "";
     position: absolute;
     border-radius: 50%;
     width: 12px;
@@ -79,14 +90,15 @@
   span {
     border: none;
     box-shadow: none;
+    color: var(--color-black);
   }
 
   &:hover,
   &:focus {
     span {
       background-color: transparent !important;
-      color: var(--color-white) !important;
-      opacity: .75;
+      color: var(--color-primary) !important;
+      opacity: 0.75;
     }
   }
 }

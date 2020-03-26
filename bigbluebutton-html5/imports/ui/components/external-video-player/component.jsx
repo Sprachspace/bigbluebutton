@@ -4,6 +4,7 @@ import { defineMessages, injectIntl } from 'react-intl';
 import ReactPlayer from 'react-player';
 import { sendMessage, onMessage, removeAllListeners } from './service';
 import logger from '/imports/startup/client/logger';
+import ActionsDropdown from '/imports/ui/components/actions-bar/actions-dropdown/component';
 
 import ArcPlayer from './custom-players/arc-player';
 
@@ -154,25 +155,26 @@ class VideoPlayer extends Component {
     const timestamp = Date.now();
 
     // If message is just a quick pause/un-pause just send nothing
-    const sinceLastMessage = (timestamp - this.lastMessageTimestamp)/1000;
-    if ((msg === 'play' && this.lastMessage === 'stop' ||
-         msg === 'stop' && this.lastMessage === 'play') &&
-         sinceLastMessage < THROTTLE_INTERVAL_SECONDS) {
-
-         return clearTimeout(this.throttleTimeout);
+    const sinceLastMessage = (timestamp - this.lastMessageTimestamp) / 1000;
+    if (
+      ((msg === 'play' && this.lastMessage === 'stop')
+        || (msg === 'stop' && this.lastMessage === 'play'))
+      && sinceLastMessage < THROTTLE_INTERVAL_SECONDS
+    ) {
+      return clearTimeout(this.throttleTimeout);
     }
 
     // Ignore repeat presenter ready messages
     if (this.lastMessage === msg && msg === 'presenterReady') {
-      logger.debug("Ignoring a repeated presenterReady message");
+      logger.debug('Ignoring a repeated presenterReady message');
     } else {
       // Play/pause messages are sent with a delay, to permit cancelling it in case of
       // quick sucessive play/pauses
-      const messageDelay = (msg === 'play' || msg === 'stop') ? THROTTLE_INTERVAL_SECONDS : 0;
+      const messageDelay = msg === 'play' || msg === 'stop' ? THROTTLE_INTERVAL_SECONDS : 0;
 
       this.throttleTimeout = setTimeout(() => {
         sendMessage(msg, { ...params, timestamp });
-      }, messageDelay*1000);
+      }, messageDelay * 1000);
 
       this.lastMessage = msg;
       this.lastMessageTimestamp = timestamp;
@@ -208,7 +210,10 @@ class VideoPlayer extends Component {
   getCurrentPlaybackRate() {
     const intPlayer = this.player && this.player.getInternalPlayer();
 
-    return (intPlayer && intPlayer.getPlaybackRate && intPlayer.getPlaybackRate()) || 1;
+    return (
+      (intPlayer && intPlayer.getPlaybackRate && intPlayer.getPlaybackRate())
+      || 1
+    );
   }
 
   setPlaybackRate(rate) {
@@ -228,20 +233,29 @@ class VideoPlayer extends Component {
     const par = this.playerParent.parentElement;
     const w = par.clientWidth;
     const h = par.clientHeight;
-    const idealW = h * 16 / 9;
+
+    const hMinbutton = h - 65;
+    const idealW = (hMinbutton * 16) / 9;
 
     const style = {};
+    const styleParent = {};
     if (idealW > w) {
+      styleParent.width = w;
       style.width = w;
-      style.height = w * 9 / 16;
+      style.height = (w * 9) / 16;
+      styleParent.height = style.height + 50;
+      styleParent.width = w;
     } else {
       style.width = idealW;
-      style.height = h;
+      style.height = hMinbutton;
+      styleParent.width = idealW;
+      styleParent.height = h;
     }
 
     const styleStr = `width: ${style.width}px; height: ${style.height}px;`;
+    const styleStrParent = `width: ${styleParent.width}px; height: ${styleParent.height}px;`;
     this.player.wrapper.style = styleStr;
-    this.playerParent.style = styleStr;
+    this.playerParent.style = styleStrParent;
   }
 
   clearVideoListeners() {
@@ -263,9 +277,12 @@ class VideoPlayer extends Component {
         // Always pause video if presenter is has not started sharing, e.g., blocked by autoplay
         const playingState = this.hasPlayedBefore ? playing : false;
 
-        this.sendSyncMessage('playerUpdate', { rate, time: curTime, state: playingState });
+        this.sendSyncMessage('playerUpdate', {
+          rate,
+          time: curTime,
+          state: playingState,
+        });
       }, SYNC_INTERVAL_SECONDS * 1000);
-
     } else {
       onMessage('play', ({ time, timestamp }) => {
         const { hasPlayedBefore, player } = this;
@@ -276,7 +293,10 @@ class VideoPlayer extends Component {
         this.seekTo(time, timestamp);
         this.setState({ playing: true });
 
-        logger.debug({ logCode: 'external_video_client_play' }, 'Play external video');
+        logger.debug(
+          { logCode: 'external_video_client_play' },
+          'Play external video',
+        );
       });
 
       onMessage('stop', ({ time, timestamp }) => {
@@ -288,13 +308,19 @@ class VideoPlayer extends Component {
         this.seekTo(time, timestamp);
         this.setState({ playing: false });
 
-        logger.debug({ logCode: 'external_video_client_stop' }, 'Stop external video');
+        logger.debug(
+          { logCode: 'external_video_client_stop' },
+          'Stop external video',
+        );
       });
 
       onMessage('presenterReady', (data) => {
         const { hasPlayedBefore } = this;
 
-        logger.debug({ logCode: 'external_video_presenter_ready' }, 'Presenter is ready to sync');
+        logger.debug(
+          { logCode: 'external_video_presenter_ready' },
+          'Presenter is ready to sync',
+        );
 
         if (!hasPlayedBefore) {
           this.setState({ playing: true });
@@ -304,7 +330,9 @@ class VideoPlayer extends Component {
       onMessage('playerUpdate', (data) => {
         const { hasPlayedBefore, player } = this;
         const { playing } = this.state;
-        const { time, timestamp, rate, state } = data;
+        const {
+          time, timestamp, rate, state,
+        } = data;
 
         if (!player || !hasPlayedBefore) {
           return;
@@ -312,12 +340,15 @@ class VideoPlayer extends Component {
 
         if (rate !== this.getCurrentPlaybackRate()) {
           this.setPlaybackRate(rate);
-          logger.debug({
-            logCode: 'external_video_client_update_rate',
-            extraInfo: {
-              newRate: rate,
+          logger.debug(
+            {
+              logCode: 'external_video_client_update_rate',
+              extraInfo: {
+                newRate: rate,
+              },
             },
-          }, 'Change external video playback rate.');
+            'Change external video playback rate.',
+          );
         }
 
         this.seekTo(time, timestamp);
@@ -333,29 +364,38 @@ class VideoPlayer extends Component {
     const { player } = this;
 
     if (!player) {
-      return logger.error("No player on seek");
+      return logger.error('No player on seek');
     }
 
     const curTimestamp = Date.now();
-    const timestampDiff = (curTimestamp - timestamp)/1000;
+    const timestampDiff = (curTimestamp - timestamp) / 1000;
     const realTime = time + timestampDiff;
 
     // Ignore seek commands that arrived too late
     if (timestampDiff > SYNC_INTERVAL_SECONDS) {
-      logger.debug({
-        logCode: 'external_video_client_message_too_late',
-        extraInfo: { time, timestamp, },
-      }, 'Not seeking because message came too late');
+      logger.debug(
+        {
+          logCode: 'external_video_client_message_too_late',
+          extraInfo: { time, timestamp },
+        },
+        'Not seeking because message came too late',
+      );
       return;
     }
 
     // Seek if viewer has drifted too far away from presenter
-    if (Math.abs(this.getCurrentTime() - realTime) > SYNC_INTERVAL_SECONDS*0.75) {
+    if (
+      Math.abs(this.getCurrentTime() - realTime)
+      > SYNC_INTERVAL_SECONDS * 0.75
+    ) {
       player.seekTo(realTime, true);
-      logger.debug({
-        logCode: 'external_video_client_update_seek',
-        extraInfo: { time, timestamp, },
-      }, `Seek external video to: ${time}`);
+      logger.debug(
+        {
+          logCode: 'external_video_client_update_seek',
+          extraInfo: { time, timestamp },
+        },
+        `Seek external video to: ${time}`,
+      );
     }
   }
 
@@ -370,7 +410,10 @@ class VideoPlayer extends Component {
 
     this.handleResize();
 
-    this.autoPlayTimeout = setTimeout(this.autoPlayBlockDetected, AUTO_PLAY_BLOCK_DETECTION_TIMEOUT_SECONDS * 1000);
+    this.autoPlayTimeout = setTimeout(
+      this.autoPlayBlockDetected,
+      AUTO_PLAY_BLOCK_DETECTION_TIMEOUT_SECONDS * 1000,
+    );
   }
 
   handleOnPlay() {
@@ -402,25 +445,40 @@ class VideoPlayer extends Component {
   }
 
   render() {
-    const { videoUrl, intl } = this.props;
     const {
-      playing, playbackRate, mutedByEchoTest, autoPlayBlocked,
+      videoUrl,
+      intl,
+      amIPresenter,
+      amIModerator,
+      isPollingEnabled,
+      allowExternalVideo,
+      handleTakePresenter,
+      isSharingVideo,
+      stopExternalVideoShare,
+      isMeteorConnected,
+    } = this.props;
+    const {
+      playing,
+      playbackRate,
+      mutedByEchoTest,
+      autoPlayBlocked,
     } = this.state;
 
     return (
       <div
         id="video-player"
         data-test="videoPlayer"
-        ref={(ref) => { this.playerParent = ref; }}
+        ref={(ref) => {
+          this.playerParent = ref;
+        }}
       >
-        {autoPlayBlocked
-          ? (
-            <p className={styles.autoPlayWarning}>
-              {intl.formatMessage(intlMessages.autoPlayWarning)}
-            </p>
-          )
-          : ''
-        }
+        {autoPlayBlocked ? (
+          <p className={styles.autoPlayWarning}>
+            {intl.formatMessage(intlMessages.autoPlayWarning)}
+          </p>
+        ) : (
+          ''
+        )}
         <ReactPlayer
           className={styles.videoPlayer}
           url={videoUrl}
@@ -431,8 +489,25 @@ class VideoPlayer extends Component {
           onReady={this.handleOnReady}
           onPlay={this.handleOnPlay}
           onPause={this.handleOnPause}
-          ref={(ref) => { this.player = ref; }}
+          ref={(ref) => {
+            this.player = ref;
+          }}
         />
+        <div className={styles.externalVideoButtonBar}>
+          <ActionsDropdown
+            {...{
+              amIPresenter,
+              amIModerator,
+              isPollingEnabled,
+              allowExternalVideo,
+              handleTakePresenter,
+              intl,
+              isSharingVideo,
+              stopExternalVideoShare,
+              isMeteorConnected,
+            }}
+          />
+        </div>
       </div>
     );
   }

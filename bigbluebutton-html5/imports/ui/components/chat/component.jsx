@@ -9,6 +9,7 @@ import { styles } from './styles.scss';
 import MessageForm from './message-form/container';
 import MessageList from './message-list/container';
 import ChatDropdown from './chat-dropdown/component';
+import UserParticipantsContainer from '../user-list/user-list-content/user-participants/container';
 
 const ELEMENT_ID = 'chat-messages';
 
@@ -41,55 +42,71 @@ const Chat = (props) => {
     minMessageLength,
     maxMessageLength,
     amIModerator,
+    compact,
+    currentUser,
+    setEmojiStatus,
+    roving,
+    requestUserInformation,
   } = props;
 
   const HIDE_CHAT_AK = shortcuts.hidePrivateChat;
   const CLOSE_CHAT_AK = shortcuts.closePrivateChat;
 
   return (
-    <div
-      data-test="publicChat"
-      className={styles.chat}
-    >
+    <div data-test="publicChat" className={styles.chat}>
       <header className={styles.header}>
-        <div
-          data-test="chatTitle"
-          className={styles.title}
-        >
+        <div data-test="chatTitle" className={styles.title}>
           <Button
             onClick={() => {
               Session.set('idChatOpen', '');
               Session.set('openPanel', 'userlist');
             }}
-            aria-label={intl.formatMessage(intlMessages.hideChatLabel, { 0: title })}
+            aria-label={intl.formatMessage(intlMessages.hideChatLabel, {
+              0: title,
+            })}
             accessKey={HIDE_CHAT_AK}
             label={title}
             icon="left_arrow"
             className={styles.hideBtn}
           />
         </div>
-        {
-          chatID !== 'public'
-            ? (
-              <Button
-                icon="close"
-                size="sm"
-                ghost
-                color="dark"
-                hideLabel
-                onClick={() => {
-                  actions.handleClosePrivateChat(chatID);
-                  Session.set('idChatOpen', '');
-                  Session.set('openPanel', 'userlist');
-                }}
-                aria-label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}
-                label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}
-                accessKey={CLOSE_CHAT_AK}
-              />
-            )
-            : <ChatDropdown isMeteorConnected={isMeteorConnected} amIModerator={amIModerator} />
-        }
+        {chatID !== 'public' ? (
+          <Button
+            icon="close"
+            size="sm"
+            ghost
+            color="dark"
+            hideLabel
+            onClick={() => {
+              actions.handleClosePrivateChat(chatID);
+              Session.set('idChatOpen', '');
+              Session.set('openPanel', 'userlist');
+            }}
+            aria-label={intl.formatMessage(intlMessages.closeChatLabel, {
+              0: title,
+            })}
+            label={intl.formatMessage(intlMessages.closeChatLabel, {
+              0: title,
+            })}
+            accessKey={CLOSE_CHAT_AK}
+          />
+        ) : (
+          <ChatDropdown
+            isMeteorConnected={isMeteorConnected}
+            amIModerator={amIModerator}
+          />
+        )}
       </header>
+      <UserParticipantsContainer
+        {...{
+          compact,
+          intl,
+          currentUser,
+          setEmojiStatus,
+          roving,
+          requestUserInformation,
+        }}
+      />
       <MessageList
         id={ELEMENT_ID}
         chatId={chatID}
@@ -123,18 +140,25 @@ const Chat = (props) => {
   );
 };
 
-export default withShortcutHelper(injectWbResizeEvent(injectIntl(memo(Chat))), ['hidePrivateChat', 'closePrivateChat']);
+export default withShortcutHelper(injectWbResizeEvent(injectIntl(memo(Chat))), [
+  'hidePrivateChat',
+  'closePrivateChat',
+]);
 
 const propTypes = {
   chatID: PropTypes.string.isRequired,
   chatName: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-  messages: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.oneOfType([
-    PropTypes.array,
-    PropTypes.string,
-    PropTypes.number,
-    PropTypes.object,
-  ])).isRequired).isRequired,
+  messages: PropTypes.arrayOf(
+    PropTypes.objectOf(
+      PropTypes.oneOfType([
+        PropTypes.array,
+        PropTypes.string,
+        PropTypes.number,
+        PropTypes.object,
+      ]),
+    ).isRequired,
+  ).isRequired,
   shortcuts: PropTypes.objectOf(PropTypes.string),
   partnerIsLoggedOut: PropTypes.bool.isRequired,
   isChatLocked: PropTypes.bool.isRequired,

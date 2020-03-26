@@ -16,7 +16,7 @@ const propTypes = {
   getStats: PropTypes.func.isRequired,
   stopGettingStats: PropTypes.func.isRequired,
   enableVideoStats: PropTypes.bool.isRequired,
-  webcamDraggableDispatch: PropTypes.func.isRequired,
+  // webcamDraggableDispatch: PropTypes.func.isRequired,
   intl: PropTypes.objectOf(Object).isRequired,
 };
 
@@ -41,24 +41,31 @@ const intlMessages = defineMessages({
   },
 });
 
-const findOptimalGrid = (canvasWidth, canvasHeight, gutter, aspectRatio, numItems, columns = 1) => {
+const findOptimalGrid = (
+  canvasWidth,
+  canvasHeight,
+  gutter,
+  aspectRatio,
+  numItems,
+  columns = 1,
+) => {
   const rows = Math.ceil(numItems / columns);
   const gutterTotalWidth = (columns - 1) * gutter;
   const gutterTotalHeight = (rows - 1) * gutter;
   const usableWidth = canvasWidth - gutterTotalWidth;
   const usableHeight = canvasHeight - gutterTotalHeight;
-  let cellWidth = Math.floor(usableWidth / columns);
-  let cellHeight = Math.ceil(cellWidth / aspectRatio);
-  if ((cellHeight * rows) > usableHeight) {
-    cellHeight = Math.floor(usableHeight / rows);
-    cellWidth = Math.ceil(cellHeight * aspectRatio);
+  let cellHeight = Math.floor(usableHeight / rows);
+  let cellWidth = Math.ceil(cellHeight * aspectRatio);
+  if (cellWidth * columns > usableWidth) {
+    cellWidth = Math.floor(usableWidth / columns);
+    cellHeight = Math.ceil(cellWidth / aspectRatio);
   }
   return {
     columns,
     rows,
-    width: (cellWidth * columns) + gutterTotalWidth,
-    height: (cellHeight * rows) + gutterTotalHeight,
-    filledArea: (cellWidth * cellHeight) * numItems,
+    width: cellWidth * columns + gutterTotalWidth,
+    height: cellHeight * rows + gutterTotalHeight,
+    filledArea: cellWidth * cellHeight * numItems,
   };
 };
 
@@ -82,11 +89,14 @@ class VideoList extends Component {
     this.grid = null;
     this.canvas = null;
     this.failedMediaElements = [];
-    this.handleCanvasResize = _.throttle(this.handleCanvasResize.bind(this), 66,
+    this.handleCanvasResize = _.throttle(
+      this.handleCanvasResize.bind(this),
+      66,
       {
         leading: true,
         trailing: true,
-      });
+      },
+    );
     this.setOptimalGrid = this.setOptimalGrid.bind(this);
     this.handleAllowAutoplay = this.handleAllowAutoplay.bind(this);
     this.handlePlayElementFailed = this.handlePlayElementFailed.bind(this);
@@ -94,13 +104,11 @@ class VideoList extends Component {
   }
 
   componentDidMount() {
-    const { webcamDraggableDispatch } = this.props;
-    webcamDraggableDispatch(
-      {
-        type: 'setVideoListRef',
-        value: this.grid,
-      },
-    );
+    // const { webcamDraggableDispatch } = this.props;
+    // webcamDraggableDispatch({
+    //   type: "setVideoListRef",
+    //   value: this.grid
+    // });
 
     this.handleCanvasResize();
     window.addEventListener('resize', this.handleCanvasResize, false);
@@ -119,26 +127,39 @@ class VideoList extends Component {
       return;
     }
     const { focusedId } = this.state;
-    const { width: canvasWidth, height: canvasHeight } = this.canvas.getBoundingClientRect();
+    const {
+      width: canvasWidth,
+      height: canvasHeight,
+    } = this.canvas.getBoundingClientRect();
 
-    const gridGutter = parseInt(window.getComputedStyle(this.grid)
-      .getPropertyValue('grid-row-gap'), 10);
+    const gridGutter = parseInt(
+      window.getComputedStyle(this.grid).getPropertyValue('grid-row-gap'),
+      10,
+    );
     const hasFocusedItem = numItems > 2 && focusedId;
     // Has a focused item so we need +3 cells
     if (hasFocusedItem) {
       numItems += 3;
     }
-    const optimalGrid = _.range(1, numItems + 1)
-      .reduce((currentGrid, col) => {
+    const optimalGrid = _.range(1, numItems + 1).reduce(
+      (currentGrid, col) => {
         const testGrid = findOptimalGrid(
-          canvasWidth, canvasHeight, gridGutter,
-          ASPECT_RATIO, numItems, col,
+          canvasWidth,
+          canvasHeight,
+          gridGutter,
+          ASPECT_RATIO,
+          numItems,
+          1,
         );
         // We need a minimun of 2 rows and columns for the focused
-        const focusedConstraint = hasFocusedItem ? testGrid.rows > 1 && testGrid.columns > 1 : true;
+        const focusedConstraint = hasFocusedItem
+          ? testGrid.rows > 1 && testGrid.columns > 1
+          : true;
         const betterThanCurrent = testGrid.filledArea > currentGrid.filledArea;
         return focusedConstraint && betterThanCurrent ? testGrid : currentGrid;
-      }, { filledArea: 0 });
+      },
+      { filledArea: 0 },
+    );
     this.setState({
       optimalGrid,
     });
@@ -147,9 +168,12 @@ class VideoList extends Component {
   handleAllowAutoplay() {
     const { autoplayBlocked } = this.state;
 
-    logger.info({
-      logCode: 'video_provider_autoplay_allowed',
-    }, 'Video media autoplay allowed by the user');
+    logger.info(
+      {
+        logCode: 'video_provider_autoplay_allowed',
+      },
+      'Video media autoplay allowed by the user',
+    );
 
     this.autoplayWasHandled = true;
     window.removeEventListener('videoPlayFailed', this.handlePlayElementFailed);
@@ -158,17 +182,25 @@ class VideoList extends Component {
       if (mediaElement) {
         const played = playAndRetry(mediaElement);
         if (!played) {
-          logger.error({
-            logCode: 'video_provider_autoplay_handling_failed',
-          }, 'Video autoplay handling failed to play media');
+          logger.error(
+            {
+              logCode: 'video_provider_autoplay_handling_failed',
+            },
+            'Video autoplay handling failed to play media',
+          );
         } else {
-          logger.info({
-            logCode: 'video_provider_media_play_success',
-          }, 'Video media played successfully');
+          logger.info(
+            {
+              logCode: 'video_provider_media_play_success',
+            },
+            'Video media played successfully',
+          );
         }
       }
     }
-    if (autoplayBlocked) { this.setState({ autoplayBlocked: false }); }
+    if (autoplayBlocked) {
+      this.setState({ autoplayBlocked: false });
+    }
   }
 
   handlePlayElementFailed(e) {
@@ -178,18 +210,24 @@ class VideoList extends Component {
     e.stopPropagation();
     this.failedMediaElements.push(mediaElement);
     if (!autoplayBlocked && !this.autoplayWasHandled) {
-      logger.info({
-        logCode: 'video_provider_autoplay_prompt',
-      }, 'Prompting user for action to play video media');
+      logger.info(
+        {
+          logCode: 'video_provider_autoplay_prompt',
+        },
+        'Prompting user for action to play video media',
+      );
       this.setState({ autoplayBlocked: true });
     }
   }
 
   handleVideoFocus(id) {
     const { focusedId } = this.state;
-    this.setState({
-      focusedId: focusedId !== id ? id : false,
-    }, this.handleCanvasResize);
+    this.setState(
+      {
+        focusedId: focusedId !== id ? id : false,
+      },
+      this.handleCanvasResize,
+    );
     window.dispatchEvent(new Event('videoFocusChange'));
   }
 
@@ -221,11 +259,15 @@ class VideoList extends Component {
       let actions = [];
 
       if (users.length > 2) {
-        actions = [{
-          label: intl.formatMessage(intlMessages[`${isFocusedIntlKey}Label`]),
-          description: intl.formatMessage(intlMessages[`${isFocusedIntlKey}Desc`]),
-          onClick: () => this.handleVideoFocus(user.userId),
-        }];
+        actions = [
+          {
+            label: intl.formatMessage(intlMessages[`${isFocusedIntlKey}Label`]),
+            description: intl.formatMessage(
+              intlMessages[`${isFocusedIntlKey}Desc`],
+            ),
+            onClick: () => this.handleVideoFocus(user.userId),
+          },
+        ];
       }
 
       return (
@@ -244,7 +286,8 @@ class VideoList extends Component {
               this.handleCanvasResize();
               onMount(user.userId, videoRef);
             }}
-            getStats={(videoRef, callback) => getStats(user.userId, videoRef, callback)}
+            getStats={(videoRef, callback) => getStats(user.userId, videoRef, callback)
+            }
             stopGettingStats={() => stopGettingStats(user.userId)}
             enableVideoStats={enableVideoStats}
             swapLayout={swapLayout}
@@ -289,10 +332,14 @@ class VideoList extends Component {
             {this.renderVideoList()}
           </div>
         )}
-        { !autoplayBlocked ? null : (
+        {!autoplayBlocked ? null : (
           <AutoplayOverlay
-            autoplayBlockedDesc={intl.formatMessage(intlMessages.autoplayBlockedDesc)}
-            autoplayAllowLabel={intl.formatMessage(intlMessages.autoplayAllowLabel)}
+            autoplayBlockedDesc={intl.formatMessage(
+              intlMessages.autoplayBlockedDesc,
+            )}
+            autoplayAllowLabel={intl.formatMessage(
+              intlMessages.autoplayAllowLabel,
+            )}
             handleAllowAutoplay={this.handleAllowAutoplay}
           />
         )}

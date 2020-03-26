@@ -12,7 +12,6 @@ import RecordingIndicator from './recording-indicator/container';
 import TalkingIndicatorContainer from '/imports/ui/components/nav-bar/talking-indicator/container';
 import SettingsDropdownContainer from './settings-dropdown/container';
 
-
 const intlMessages = defineMessages({
   toggleUserListLabel: {
     id: 'app.navBar.userListToggleBtnLabel',
@@ -42,12 +41,7 @@ const defaultProps = {
 
 class NavBar extends PureComponent {
   static handleToggleUserList() {
-    Session.set(
-      'openPanel',
-      Session.get('openPanel') !== ''
-        ? ''
-        : 'userlist',
-    );
+    Session.set('openPanel', Session.get('openPanel') !== '' ? '' : 'userlist');
     Session.set('idChatOpen', '');
   }
 
@@ -57,8 +51,10 @@ class NavBar extends PureComponent {
       connectRecordingObserver,
     } = this.props;
 
-    if (Meteor.settings.public.allowOutsideCommands.toggleRecording
-      || getFromUserSettings('bbb_outside_toggle_recording', false)) {
+    if (
+      Meteor.settings.public.allowOutsideCommands.toggleRecording
+      || getFromUserSettings('bbb_outside_toggle_recording', false)
+    ) {
       connectRecordingObserver();
       window.addEventListener('message', processOutsideToggleRecording);
     }
@@ -79,19 +75,20 @@ class NavBar extends PureComponent {
       amIModerator,
     } = this.props;
 
-
     const toggleBtnClasses = {};
     toggleBtnClasses[styles.btn] = true;
     toggleBtnClasses[styles.btnWithNotificationDot] = hasUnreadMessages;
 
     let ariaLabel = intl.formatMessage(intlMessages.toggleUserListAria);
-    ariaLabel += hasUnreadMessages ? (` ${intl.formatMessage(intlMessages.newMessages)}`) : '';
+    ariaLabel += hasUnreadMessages
+      ? ` ${intl.formatMessage(intlMessages.newMessages)}`
+      : '';
 
     return (
       <div className={styles.navbar}>
         <div className={styles.top}>
           <div className={styles.left}>
-            <Button
+            {/* <Button
               data-test="userListToggleButton"
               onClick={NavBar.handleToggleUserList}
               ghost
@@ -103,10 +100,22 @@ class NavBar extends PureComponent {
               className={cx(toggleBtnClasses)}
               aria-expanded={isExpanded}
               accessKey={TOGGLE_USERLIST_AK}
-            />
+            /> */}
+            <a
+              className={styles.logolink}
+              href="https://joeps-first-project-ccc3d2.webflow.io/"
+              target="_blank"
+            >
+              <img
+                alt="Qries"
+                src="https://uploads-ssl.webflow.com/5ccda3070b9ef2f758edcce5/5e3757d71212672bbdc624cf_sprachspace.png"
+                width="72"
+                height="40"
+              />
+            </a>
           </div>
           <div className={styles.center}>
-            <h1 className={styles.presentationTitle}>{presentationTitle}</h1>
+            <TalkingIndicatorContainer amIModerator={amIModerator} />
 
             <RecordingIndicator
               mountModal={mountModal}
@@ -117,9 +126,6 @@ class NavBar extends PureComponent {
             <SettingsDropdownContainer amIModerator={amIModerator} />
           </div>
         </div>
-        <div className={styles.bottom}>
-          <TalkingIndicatorContainer amIModerator={amIModerator} />
-        </div>
       </div>
     );
   }
@@ -127,4 +133,7 @@ class NavBar extends PureComponent {
 
 NavBar.propTypes = propTypes;
 NavBar.defaultProps = defaultProps;
-export default withShortcutHelper(withModalMounter(injectIntl(NavBar)), 'toggleUserList');
+export default withShortcutHelper(
+  withModalMounter(injectIntl(NavBar)),
+  'toggleUserList',
+);
